@@ -37,7 +37,7 @@ class HTTPClient:
         endpoint: str,
         method: HTTPMethod,
         params: dict[str, Any] | None = None,
-        json: dict[str, Any] = None,
+        json: dict[str, Any] | None = None,
     ) -> dict[str, Any] | None:
         try:
             response = self.client.request(
@@ -56,12 +56,14 @@ class HTTPClient:
             raise CTFDError(f"The response could not be parsed:\n{decode_exc!r}")
 
     def get_item(self, endpoint: str, id: int) -> dict[str, Any] | None:
-        return self._request(f"{endpoint}/{id}")
+        return self._request(f"{endpoint}/{id}", HTTPMethod.GET)
 
     def get_items(self, endpoint: str) -> list[dict[str, Any]] | None:
         data = self._request(endpoint, HTTPMethod.GET)
         if not data:
             return None
+        
+        res = [data]
 
         try:
             if data["meta"]["pagination"]["pages"] > 1:
@@ -70,8 +72,8 @@ class HTTPClient:
                     if not new_rq:
                         continue
 
-                    data += new_rq
+                    res.append(new_rq)
         except KeyError:
             pass
 
-        return data
+        return res
