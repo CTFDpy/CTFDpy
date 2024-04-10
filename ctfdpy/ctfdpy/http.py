@@ -47,13 +47,27 @@ class HTTPClient:
             if not response.content:
                 return None
 
-            return response.json()
+            return self._parse_ctfd_response(response.json())
         except httpx.RequestError as request_exc:
             raise CTFDError(
                 f"An error occurred while requesting {request_exc.request.url!r}:\n{request_exc!r}"
             )
         except (JSONDecodeError, TypeError) as decode_exc:
             raise CTFDError(f"The response could not be parsed:\n{decode_exc!r}")
+
+
+    def _parse_ctfd_response(self, response: dict[str, Any] | None) -> dict[str, Any] | None:
+        if not response:
+            return None
+
+        if response.get("success", False):
+            return response.get("data", None)
+
+        if err := response.get("errors", None):
+            raise CTFDError(f"An error occurred while processing the request:\n{err}")
+
+        raise CTFDError("An unknown error occurred while processing the request")
+
 
     def get_item(self, endpoint: str, id: int) -> dict[str, Any] | None:
         return self._request(f"{endpoint}/{id}", HTTPMethod.GET)
