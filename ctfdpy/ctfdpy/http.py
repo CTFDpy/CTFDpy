@@ -4,9 +4,9 @@ from typing import Any
 
 import httpx
 
+from httpx import Response
 
-class CTFDError(Exception):
-    """Exception class to handle exceptions thrown for any request regarding CTFd API"""
+from .exceptions import CTFDError, HTTPError
 
 
 class HTTPMethod(Enum):
@@ -39,21 +39,84 @@ class HTTPClient:
         params: dict[str, Any] | None = None,
         json: dict[str, Any] | None = None,
     ) -> dict[str, Any] | None:
+        """
+        Generate a request with the given information and by using token and base_url
+        Then returns the parsed response containing either the data or nothing
+
+        Parameters:
+        --------------
+        endpoint : str
+            The endpoint to request
+        method : HTTPMethod
+            The HTTP method to use
+        params : dict[str, Any] | None
+            The URL parameters to send with the request
+        json : dict[str, Any] | None
+            The json data to send with the request
+
+        Returns:
+        --------------
+        dict[str, Any] | None
+            The parsed response containing either the data field of the response or nothing
+
+        Raises:
+        --------------
+        CTFDError
+            If an error occurred while requesting the endpoint
+        """
         try:
-            response = self.client.request(
+            return self._parse_ctfd_response(self.client.request(
                 method=method.value, url=endpoint, params=params, json=json
-            )
-
-            if not response.content:
-                return None
-
-            return response.json()
+            ))
         except httpx.RequestError as request_exc:
             raise CTFDError(
                 f"An error occurred while requesting {request_exc.request.url!r}:\n{request_exc!r}"
             )
+
+    def _parse_ctfd_response(self, response: Response) -> dict[str, Any] | None:
+        """
+        Parse the httpx response and return the data field of the response if the request is successful
+        If it encounters an error, it raises a CTFDError
+
+        Parameters:
+        --------------
+        response : Response
+            The response object to parse
+        
+        Returns:
+        --------------
+        dict[str, Any] | None
+            The data field of the response if the request is successful, otherwise None
+        
+        Raises:
+        --------------
+        CTFDError
+            If the response is not successful or an error occurred while processing the request
+        """
+
+        if not response.content:
+            return None
+        
+        data: dict[str, Any] | None = None
+        try:
+            data = response.json()
         except (JSONDecodeError, TypeError) as decode_exc:
             raise CTFDError(f"The response could not be parsed:\n{decode_exc!r}")
+
+        if not data:
+            return None
+
+        if data.get("success", False):
+            return data.get("data", None)
+
+        if err := data.get("errors", None):
+            raise HTTPError(err, response.status_code)
+        
+        if err := data.get("message", None):
+            raise HTTPError(err, response.status_code)
+
+        raise CTFDError("An unknown error occurred while processing the request")
+
 
     def get_item(self, endpoint: str, id: int) -> dict[str, Any] | None:
         return self._request(f"{endpoint}/{id}", HTTPMethod.GET)
