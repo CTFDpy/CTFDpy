@@ -6,7 +6,7 @@ import httpx
 
 from httpx import Response
 
-from .exceptions import CTFDError, HTTPError
+from .exceptions import RequestError, HTTPError, ParseRequestError
 
 
 class HTTPMethod(Enum):
@@ -43,33 +43,24 @@ class HTTPClient:
         Generate a request with the given information and by using token and base_url
         Then returns the parsed response containing either the data or nothing
 
-        Parameters:
-        --------------
-        endpoint : str
-            The endpoint to request
-        method : HTTPMethod
-            The HTTP method to use
-        params : dict[str, Any] | None
-            The URL parameters to send with the request
-        json : dict[str, Any] | None
-            The json data to send with the request
-
-        Returns:
-        --------------
-        dict[str, Any] | None
-            The parsed response containing either the data field of the response or nothing
+        Args:
+            endpoint (str): The endpoint to request
+            method (HTTPMethod): The HTTP method to use
+            params (dict[str, Any] | None, optional): The URL parameters to send with the request. Defaults to None.
+            json (dict[str, Any] | None, optional): The JSON data to send with the request. Defaults to None.
 
         Raises:
-        --------------
-        CTFDError
-            If an error occurred while requesting the endpoint
-        """
+            RequestError: The httpx request could not be completed or ended with an unhandled error
+
+        Returns:
+            dict[str, Any] | None: The parsed response containing the data field if it exists
+        """        
         try:
             return self._parse_ctfd_response(self.client.request(
                 method=method.value, url=endpoint, params=params, json=json
             ))
         except httpx.RequestError as request_exc:
-            raise CTFDError(
+            raise RequestError(
                 f"An error occurred while requesting {request_exc.request.url!r}:\n{request_exc!r}"
             )
 
@@ -78,20 +69,16 @@ class HTTPClient:
         Parse the httpx response and return the data field of the response if the request is successful
         If it encounters an error, it raises a CTFDError
 
-        Parameters:
-        --------------
-        response : Response
-            The response object to parse
-        
-        Returns:
-        --------------
-        dict[str, Any] | None
-            The data field of the response if the request is successful, otherwise None
-        
+        Args:
+            response (Response): The response object received from the httpx request
+
         Raises:
-        --------------
-        CTFDError
-            If the response is not successful or an error occurred while processing the request
+            ParseRequestError: The response could not be parsed
+            RequestError: The request could not be parsed or the error could not be identified
+            HTTPError: The response contains an handled error status code
+
+        Returns:
+            dict[str, Any] | None: The data field of the response if the request is successful
         """
 
         if not response.content:
@@ -101,7 +88,7 @@ class HTTPClient:
         try:
             data = response.json()
         except (JSONDecodeError, TypeError) as decode_exc:
-            raise CTFDError(f"The response could not be parsed:\n{decode_exc!r}")
+            raise ParseRequestError(f"The response could not be parsed:\n{decode_exc!r}")
 
         if not data:
             return None
@@ -115,7 +102,7 @@ class HTTPClient:
         if err := data.get("message", None):
             raise HTTPError(err, response.status_code)
 
-        raise CTFDError("An unknown error occurred while processing the request")
+        raise RequestError("An unknown error occurred while processing the request")
 
 
     def get_item(self, endpoint: str, id: int) -> dict[str, Any] | None:

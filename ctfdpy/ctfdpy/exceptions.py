@@ -1,7 +1,13 @@
-class CTFDError(Exception):
+class CTFDPyError(Exception):
+    """Base exception class for all exceptions in CTFDPy"""
+
+class RequestError(CTFDPyError):
     """Exception class to handle exceptions thrown for any request regarding CTFd API"""
 
-class HTTPError(CTFDError):
+class ParseRequestError(RequestError):
+    """Exception class to handle exceptions thrown for any parsing error of the response"""
+
+class HTTPError(CTFDPyError):
     """Exception class to handle exceptions thrown for any HTTP request"""
 
     def __init__(self, message: str, status_code: int) -> None:
