@@ -1,0 +1,5 @@
+# Disable fix for unused imports (`F401`).
+unfixable = ["F401"]
+
+line-length = 120
+indent-width = 4
