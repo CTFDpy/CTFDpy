@@ -1,9 +1,8 @@
-from dataclasses import dataclass
-
+from dataclasses import dataclass, field
 from datetime import datetime as dt
 
 @dataclass
-class User:
+class UserData:
     id: int = 0
     oauth_id: int = 0
     name: str = ""
@@ -19,5 +18,8 @@ class User:
     banned: bool = True
     verified: bool = True
     language: str = ""
-    team_id: int = 0
     created: dt| None = None
+    fields: list = field(default_factory=list)
+    team_id: int = 0
+    place: int = 0
+    score: int = 0

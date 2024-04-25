@@ -54,7 +54,7 @@ class HTTPClient:
 
         Returns:
             dict[str, Any] | None: The parsed response containing the data field if it exists
-        """        
+        """
         try:
             return self._parse_ctfd_response(self.client.request(
                 method=method.value, url=endpoint, params=params, json=json
@@ -104,6 +104,11 @@ class HTTPClient:
 
         raise RequestError("An unknown error occurred while processing the request")
 
+    def _generate_cropped_dict(self, data: dict[str, Any], exclude_fields: list[str]) -> dict[str, Any]:
+        if not exclude_fields:
+            return data
+        return {key: value for key, value in data.items() if key not in exclude_fields}
+
 
     def get_item(self, endpoint: str, id: int) -> dict[str, Any] | None:
         return self._request(f"{endpoint}/{id}", HTTPMethod.GET)
@@ -127,3 +132,6 @@ class HTTPClient:
             pass
 
         return res
+
+    def create_item(self, endpoint: str, json: dict[str, Any], exclude_fields: list[str] = []) -> dict[str, Any] | None:
+        return self._request(endpoint, HTTPMethod.POST, json=self._generate_cropped_dict(json, exclude_fields))
