@@ -81,9 +81,12 @@ class HTTPClient:
             dict[str, Any] | None: The data field of the response if the request is successful
         """
 
+        if response.request.method == HTTPMethod.HEAD.value and response.status_code == 200:
+            return response.headers.__dict__
+
         if not response.content:
             return None
-        
+
         data: dict[str, Any] | None = None
         try:
             data = response.json()
@@ -133,5 +136,14 @@ class HTTPClient:
 
         return res
 
+    def get_header(self, endpoint: str) -> dict[str, Any] | None:
+        return self._request(endpoint, HTTPMethod.HEAD)
+
     def create_item(self, endpoint: str, json: dict[str, Any], exclude_fields: list[str] = []) -> dict[str, Any] | None:
         return self._request(endpoint, HTTPMethod.POST, json=self._generate_cropped_dict(json, exclude_fields))
+
+    def patch_item(self, endpoint: str, id: int, json: dict[str, Any], exclude_fields: list[str] = []) -> dict[str, Any] | None:
+        return self._request(f"{endpoint}/{id}", HTTPMethod.PATCH, json=self._generate_cropped_dict(json, exclude_fields))
+
+    def delete_item(self, endpoint: str, id: int) -> None:
+        self._request(f"{endpoint}/{id}", HTTPMethod.DELETE)
