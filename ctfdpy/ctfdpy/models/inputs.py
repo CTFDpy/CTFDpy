@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 all = [
     "UserInput",
+    "TeamInput",
 ]
 
 @dataclass
@@ -11,3 +12,12 @@ class UserInput:
     password: str
     affiliation: str = ""
     country: str | None = None
+
+@dataclass
+class TeamInput:
+    name: str
+    password: str
+    email: str = ""
+    website: str = ""
+    country: str | None = None
+    bracket_id: int | None = None

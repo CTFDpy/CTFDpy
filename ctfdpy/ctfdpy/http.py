@@ -139,7 +139,7 @@ class HTTPClient:
     def get_header(self, endpoint: str) -> dict[str, Any] | None:
         return self._request(endpoint, HTTPMethod.HEAD)
 
-    def create_item(self, endpoint: str, json: dict[str, Any], exclude_fields: list[str] = []) -> dict[str, Any] | None:
+    def post_item(self, endpoint: str, json: dict[str, Any], exclude_fields: list[str] = []) -> dict[str, Any] | None:
         return self._request(endpoint, HTTPMethod.POST, json=self._generate_cropped_dict(json, exclude_fields))
 
     def patch_item(self, endpoint: str, id: int, json: dict[str, Any], exclude_fields: list[str] = []) -> dict[str, Any] | None:

@@ -15,7 +15,7 @@ class Users:
         if user_data:
             return UserData(**user_data)
         return None
-    
+
     def get_users(self) -> list[UserData] | None:
         users_data = self.http.get_items("users")
         if users_data:
@@ -30,7 +30,7 @@ class Users:
         data["email"] = email
         data["password"] = password
 
-        user_data = self.http.create_item("users", data)
+        user_data = self.http.post_item("users", data)
         if user_data:
             return UserData(**user_data)
         return None
