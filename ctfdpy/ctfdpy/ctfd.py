@@ -2,6 +2,7 @@ from .http import HTTPClient
 from .users import Users
 from .teams import Teams
 from .models.inputs import UserInput
+from .models.data import TeamData
 from typing import Any
 from .exceptions import CreationError
 
@@ -23,7 +24,7 @@ class CTFDClient:
         return False
 
 
-    def create_full_team(self, name: str, password: str, *members: UserInput, **kwargs: dict[str, Any]) -> None:
+    def create_full_team(self, name: str, password: str, *members: UserInput, **kwargs: dict[str, Any]) -> TeamData | None:
         """
         Generate a complete team with the given parameters and its members already attached
 
@@ -37,7 +38,7 @@ class CTFDClient:
             CreationError: The team could not be created
 
         Returns:
-            _type_: The team created with all its informations
+            TeamData: The team created with all its informations
         """
         team = self.teams.create_team(name, password)
         if not team:
