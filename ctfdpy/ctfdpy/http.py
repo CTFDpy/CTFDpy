@@ -32,6 +32,15 @@ class HTTPClient:
             },
         )
 
+    def _call(
+        self,
+        endpoint: str,
+        method: HTTPMethod,
+        params: dict[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
+    ) -> httpx.Response:
+        return self.client.request(method=method.value, url=endpoint, params=params, json=json)
+
     def _request(
         self,
         endpoint: str,
@@ -56,8 +65,8 @@ class HTTPClient:
             dict[str, Any] | None: The parsed response containing the data field if it exists
         """
         try:
-            return self._parse_ctfd_response(self.client.request(
-                method=method.value, url=endpoint, params=params, json=json
+            return self._parse_ctfd_response(self._call(
+                endpoint, method, params, json
             ))
         except httpx.RequestError as request_exc:
             raise RequestError(

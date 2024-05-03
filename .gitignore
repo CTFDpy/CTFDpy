@@ -305,3 +305,4 @@ pyrightconfig.json
 ### Custom rules ###
 
 test.py
+.vscode/
