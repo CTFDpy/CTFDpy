@@ -24,8 +24,8 @@ class Teams:
 
     def create_team(self, name: str, password: str) -> TeamData | None:
         data: dict[str, Any] = {}
-        if None in [name, password] or "" in [name, password]:
-            raise ValueError("name, email and password must be provided and not empty")
+        if not (name and password):
+            raise ValueError("name and password must be provided and not empty")
         data["name"] = name
         data["password"] = password
 

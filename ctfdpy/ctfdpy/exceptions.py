@@ -16,3 +16,13 @@ class HTTPError(CTFDPyError):
 
     def __str__(self) -> str:
         return f"HTTP error raised with status code {self.status_code}:\n{super().__str__()}"
+
+class CreationError(RequestError):
+    """Exception class to handle exceptions thrown for any resource expected to be created but wasn't"""
+    def __init__(self, message: str, entity: str, name: str) -> None:
+        super().__init__(message)
+        self.entity = entity
+        self.name = name
+
+    def __str__(self) -> str:
+        return f"Creation error raised for {self.entity} : {self.name}:\n{super().__str__()}"

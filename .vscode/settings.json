@@ -1,0 +1,7 @@
+{
+    "python.testing.pytestArgs": [
+        "ctfdpy"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

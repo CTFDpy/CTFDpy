@@ -24,7 +24,7 @@ class Users:
 
     def create_user(self, name: str, email: str, password: str) -> UserData | None:
         data: dict[str, Any] = {}
-        if None in [name, email, password] or "" in [name, email, password]:
+        if not (name and email and password):
             raise ValueError("name, email and password must be provided and not empty")
         data["name"] = name
         data["email"] = email
