@@ -41,6 +41,9 @@ class TeamData:
     hidden: bool = True
     banned: bool = False
     captain_id: int = 0
-    captain: UserData = UserData()
+    captain: UserData = field(default_factory=UserData)
     field_entries: list = field(default_factory=list)
+    fields: list = field(default_factory=list)
     created: dt | None = None
+    place: int = 0
+    score: int = 0
