@@ -106,7 +106,13 @@ class HTTPClient:
             return None
 
         if data.get("success", False):
-            return data.get("data", None)
+            response_data = data.get("data", {})
+            if isinstance(response_data, list):
+                response_data = {"data": response_data}
+
+            metadata = data.get("meta", {})
+            response_data |= {"meta": metadata} if metadata else {}
+            return response_data if response_data else None
 
         if err := data.get("errors", None):
             raise HTTPError(err, response.status_code)
@@ -130,16 +136,19 @@ class HTTPClient:
         if not data:
             return None
         
-        res = [data]
+        res: list[dict[str, Any]] = data.get("data", [])
 
         try:
             if data["meta"]["pagination"]["pages"] > 1:
-                for i in range(1, data["meta"]["pagination"]["pages"] + 1):
-                    new_rq = self._request(endpoint, HTTPMethod.GET, params={"page": i})
-                    if not new_rq:
+                for i in range(2, data["meta"]["pagination"]["pages"] + 1):
+                    try:
+                        new_rq = self._request(endpoint, HTTPMethod.GET, params={"page": i})
+                        if not new_rq:
+                            continue
+                    except Exception:
                         continue
 
-                    res.append(new_rq)
+                    res += new_rq.get("data", [])
         except KeyError:
             pass
 
