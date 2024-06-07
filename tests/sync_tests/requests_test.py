@@ -140,3 +140,33 @@ def test_get_items(mocker: MagicMock):
         {"id": 1, "name": "user", "email": "aze.rty@gmail.com"},
         {"id": 2, "name": "user2", "email": "aze.rty2@gmail.com"}
     ]
+
+@pytest.mark.anyio
+@patch("ctfdpy.ctfdpy.http.HTTPClient._call")
+def test_post_item(mocker: MagicMock):
+    http = HTTPClient("http://localhost", "token")
+
+    mocker.return_value = httpx.Response(
+        200,
+        json={"success": "true", "data": {"id": 1, "name": "user", "email": "aze.rty@gmail.com"}},
+        request=httpx.Request("POST", "http://localhost/users", json={"name": "user"})
+    )
+
+    response = http.post_item("users", json={"name": "user", "email": "aze.rty@gmail.com"})
+
+    assert response == {"id": 1, "name": "user", "email": "aze.rty@gmail.com"}
+
+@pytest.mark.anyio
+@patch("ctfdpy.ctfdpy.http.HTTPClient._call")
+def test_patch_item(mocker: MagicMock):
+    http = HTTPClient("http://localhost", "token")
+
+    mocker.return_value = httpx.Response(
+        200,
+        json={"success": "true", "data": {"id": 1, "name": "user", "email": "aze.rty@gmail.com"}},
+        request=httpx.Request("POST", "http://localhost/users", json={"name": "user"})
+    )
+
+    response = http.post_item("users", json={"name": "user", "email": "aze.rty@gmail.com"})
+
+    assert response == {"id": 1, "name": "user", "email": "aze.rty@gmail.com"}
