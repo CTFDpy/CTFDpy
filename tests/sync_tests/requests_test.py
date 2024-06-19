@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 from ctfdpy.ctfdpy.http import HTTPClient, HTTPMethod
 from ctfdpy.ctfdpy.exceptions import HTTPError
 
-@pytest.mark.anyio
 @patch("ctfdpy.ctfdpy.http.HTTPClient._call")
 def test_request_call(mocker: MagicMock):
     http = HTTPClient("http://localhost", "token")
@@ -26,7 +25,6 @@ def test_request_call(mocker: MagicMock):
     assert response.status_code == 200
     assert response.json() == {"success": "true", "data": [{"id": 1, "name": "user", "email": ""}]}
 
-@pytest.mark.anyio
 @patch("ctfdpy.ctfdpy.http.HTTPClient._call")
 def test_parse_ctfd_response(mocker: MagicMock):
     http = HTTPClient("http://localhost", "token")
@@ -75,7 +73,6 @@ def test_parse_ctfd_response(mocker: MagicMock):
     except Exception as e:
         pytest.fail(f"{type(e)} raised\n{str(e)}")
 
-@pytest.mark.anyio
 @patch("ctfdpy.ctfdpy.http.HTTPClient._call")
 def test_get_item(mocker: MagicMock):
     http = HTTPClient("http://localhost", "token")
@@ -89,7 +86,6 @@ def test_get_item(mocker: MagicMock):
 
     assert response == {"id": 1, "name": "user", "email": ""}
 
-@pytest.mark.anyio
 @patch("ctfdpy.ctfdpy.http.HTTPClient._call")
 def test_get_items(mocker: MagicMock):
     http = HTTPClient("http://localhost", "token")
@@ -141,7 +137,6 @@ def test_get_items(mocker: MagicMock):
         {"id": 2, "name": "user2", "email": "aze.rty2@gmail.com"}
     ]
 
-@pytest.mark.anyio
 @patch("ctfdpy.ctfdpy.http.HTTPClient._call")
 def test_post_item(mocker: MagicMock):
     http = HTTPClient("http://localhost", "token")
@@ -156,7 +151,6 @@ def test_post_item(mocker: MagicMock):
 
     assert response == {"id": 1, "name": "user", "email": "aze.rty@gmail.com"}
 
-@pytest.mark.anyio
 @patch("ctfdpy.ctfdpy.http.HTTPClient._call")
 def test_patch_item(mocker: MagicMock):
     http = HTTPClient("http://localhost", "token")
